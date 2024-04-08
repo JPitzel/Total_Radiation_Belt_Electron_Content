@@ -1,4 +1,4 @@
-# Total-Radiation-Belt-Electron-Content
+# Total Radiation Belt Electron Content
 
 MATLAB code used to compute the Total Radiation Belt Electron Content using particle flux measurements from the Van Allen Probes Magnetic Electron Ion Spectrometer (MagEIS) instrument, either as a function of the non-adiabatic invariants of kinetic energy (E), pitch angle (PA), and L-shell (L*) or the adiabatic invariants of magnetic moment (mu), second adiabatic invariant K, and L*.
 
