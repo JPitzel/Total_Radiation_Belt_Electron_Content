@@ -1,8 +1,6 @@
 %Creation Date: February 25th, 2021
 %What it does:
-%uses Phase Space Density (PSD) data from RBSPgateway
-%user selects a half orbit, range of K, mu and Lstar (between lines of %%...%%)
-%the PSD is then interpolated over the range and computes the TRBEC and the corresponding Phase Space Volume (PSV) (assuming PSD = 1 over identical bounds)
+%
 format longE
 warning('off')
 
