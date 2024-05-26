@@ -1,6 +1,7 @@
 %Creation Date: February 25th, 2021
-%What it does:
-%
+%What is does:
+%Uses MagEIS adiabatic PSD data to compute the TRBEC in E,alpha,L* coordiantes
+
 format longE
 warning('off')
 
