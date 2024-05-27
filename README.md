@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3490788.svg)](https://doi.org/10.5281/zenodo.3490788)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11326535.svg)](https://doi.org/10.5281/zenodo.11326535)
 
 # Total Radiation Belt Electron Content
 
