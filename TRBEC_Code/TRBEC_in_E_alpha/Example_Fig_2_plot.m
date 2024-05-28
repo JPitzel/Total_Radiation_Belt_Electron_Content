@@ -4,14 +4,16 @@
 %   Content", JGR - Space Physics
 % showing TRBEC integrated in (E,alpha,L*) space in March 2013.
 % Script "Example_Fig_2_calculate.m" must be run first.
+% To reproduce the entire Figure, run this script 4 times with the
+% appropriate bounds for L* (Lstar_min and Lstar_max).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Creation Date: February 28th, 2023
-%What is does:
-%uses DC (output of TRBEC_E_PA.m) and plots the TRBEC given many sets of integration bounds
 
 clear
 clc
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Setup
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tic
 directory = 'DC_E_PA\';
 export_filename = 'E_PA_35_to_4.jpg';
@@ -48,8 +50,10 @@ Lstar_bounds = [Lstar_min,Lstar_max;
                 Lstar_min,Lstar_max;
                 Lstar_min,Lstar_max;];
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Plot
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 main(directory,epoch_start,epoch_stop,separate_or_combine,individual_or_multiple,colors,E_bounds,Lstar_bounds)
-
 
 fontsize = 20;
 font_type = 'times';
@@ -100,7 +104,9 @@ end
 
 toc
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function main(directory,epoch_start,epoch_stop,separate_or_combine,individual_or_multiple,colors,E_bounds,Lstar_bounds)
 
 [filenames_rbspa,~] = select_data_filenames(directory,'rbspa',epoch_start,epoch_stop);
@@ -109,16 +115,16 @@ function main(directory,epoch_start,epoch_stop,separate_or_combine,individual_or
 [number_of_bounds,~] = size(E_bounds);
 
 for j = 1:number_of_bounds
-
+    
     [TRBEC_rbspa,epoch_rbspa] = TRBEC_E_PA(directory,filenames_rbspa,E_bounds(j,1),E_bounds(j,2),Lstar_bounds(j,1),Lstar_bounds(j,2));
     [TRBEC_rbspb,epoch_rbspb] = TRBEC_E_PA(directory,filenames_rbspb,E_bounds(j,1),E_bounds(j,2),Lstar_bounds(j,1),Lstar_bounds(j,2));
     
     %get rid of TRBEC = 0
     epoch_rbspa(TRBEC_rbspa == 0) = [];epoch_rbspb(TRBEC_rbspb == 0) = [];
     TRBEC_rbspa(TRBEC_rbspa == 0) = [];TRBEC_rbspb(TRBEC_rbspb == 0) = [];
-
+    
     if strcmp(individual_or_multiple,'mult') == 1
-       figure() 
+        figure()
     end
     
     if strcmp(separate_or_combine,'sep')
