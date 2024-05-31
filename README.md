@@ -5,7 +5,7 @@
 For a defined electron population, the Total Radiation Belt Electron Content (TRBEC) represents the number of electrons present in the Van Allen Radiation Belts. This repository contains the necessary code to compute the Total Radiation Belt Electron Content (TRBEC) using particle flux measurements from the Van Allen Probes Magnetic Electron Ion Spectrometer (MagEIS) instrument, either by defining the electrons as a function of the non-adiabatic invariants of kinetic energy (E), pitch angle (PA), and Roederer L-value (L*), or the adiabatic invariants of the magnetic moment (μ or mu), second adiabatic invariant (K), and L*. A complete technical description of the methodology of this work is available in _Estimating Electron Precipitation using the Total Radiation Belt Electron Content_ (J. Pitzel 2022, https://dx.doi.org/10.11575/PRISM/40159) and is outlined more concisely in a submission (as of May 2024) to the _Journal of Geophysical Research: Space Physics_ as a "Technical Reports: Methods" paper.
 
 <p align="center">
-  <img src="https://github.com/JPitzel/Total_Radiation_Belt_Electron_Content/blob/main/images/single_particle_motion_illustration.png" width="750">
+  <img src="https://github.com/JPitzel/Total_Radiation_Belt_Electron_Content/blob/main/images/single_particle_motion_simulation.png" width="750">
 </p>
 
 ## File Description
