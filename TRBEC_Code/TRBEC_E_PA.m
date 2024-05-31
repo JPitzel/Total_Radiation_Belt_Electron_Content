@@ -15,8 +15,8 @@ mkdir(DC_directory);%create direcotry to save differential to if it doesn't alre
 
 
 %start and stop days (inclues full half orbits that occured within the period)
-epoch_start = datenum(2019,01,01);
-epoch_stop = datenum(2019,12,31);
+epoch_start = datenum(2013,03,05);
+epoch_stop = datenum(2013,03,06);
 
 %integration bounds
 energy_min = 0.1;
