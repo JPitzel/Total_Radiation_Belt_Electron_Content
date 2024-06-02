@@ -22,8 +22,16 @@ function differential_content_mu_K(epoch_select,satellite,orbtimes,PSD_directory
     end
 
     %selects out the data for the half orbit that occured during the selected time
-    [PSD,epoch,mu,K,Lstar,energy,alpha] = half_orbit_select(PSD,epoch,mu,K,Lstar,energy,alpha,orbtimes,epoch_select);
+    [PSD,epoch,mu,K,Lstar,energy,alpha] = half_orbit_select_PSD(PSD,epoch,mu,K,Lstar,energy,alpha,orbtimes,epoch_select);
     [K_length,mu_length,Lstar_length] = size(PSD);
+    
+    % Fix missing energy levels
+    sumPSD=sum(sum(PSD,3),1);
+    for i=2:length(sumPSD)-1
+       if sumPSD(i) == 0
+          PSD(:,i,:)=exp((log(PSD(:,i-1,:))+log(PSD(:,i+1,:)))/2);
+       end
+    end
 
     %import B field data from flux data (its interpolated to be synced with PSD data)
     %(note: if moved from this spot in the code must change alpha = 90 index in the get_B_fields function)
@@ -42,6 +50,11 @@ function differential_content_mu_K(epoch_select,satellite,orbtimes,PSD_directory
     %sets K as a placeholder value when the PSD is a placeholder (these points are then ignored in the interpolation)
     K(PSD == 0) = -10^31;
 
+%Sample PSD plotted in Energy/PS space:
+%contour(alpha(2:end-3,1,260),energy(1,:,260),transpose(log(PSD(2:end-3,:,260))),100)
+%ylabel('Energy [MeV]')
+%xlabel('Pitch Angle [deg]')
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %select bounds and resolution for interpolation (NOTE: K is from 0 to K_LC)
@@ -145,7 +158,7 @@ function differential_content_mu_K(epoch_select,satellite,orbtimes,PSD_directory
         K_interp = (K_interp*std_K) + mean_K;
         mu_interp = (mu_interp*std_mu) + mean_mu;
         PSD_interp = 10.^logPSD_interp;
-
+%contour(K_interp(1,131:end),mu_interp(:,1),logPSD_interp(:,131:end),100);xlabel('K');ylabel('mu')
 
         %another flag if the interpolation isn't as expected
         if max(max(max(isinf(PSD_interp)))) ~= 0

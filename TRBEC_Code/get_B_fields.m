@@ -31,8 +31,11 @@ Bsat = data(:,3); %G
 Beq = data(:,4); %G
 
 %interpolate Bsat and Beq at the same points as the PSD data
-Bsat_interp = interp1(Lstar_from_B_fields,Bsat,Lstar_interp);
-Beq_interp = interp1(Lstar_from_B_fields,Beq,Lstar_interp);
+%Bsat_interp = interp1(Lstar_from_B_fields,Bsat,Lstar_interp);
+%Beq_interp = interp1(Lstar_from_B_fields,Beq,Lstar_interp);
+Bsat_interp = interp1(data(:,1),Bsat,epoch);
+Beq_interp = interp1(data(:,1),Beq,epoch);
+
 
 Bsat_interp(isnan(Bsat_interp)) = -10^31;
 Beq_interp(isnan(Beq_interp)) = -10^31;

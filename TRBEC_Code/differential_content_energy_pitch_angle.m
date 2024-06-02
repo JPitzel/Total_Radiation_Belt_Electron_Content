@@ -1,37 +1,69 @@
 %given half orbit and filenames to import data from, outputs the differential content
 %as a function of energy and pitch angle and the cooresponding Lstars
-function [diff_content, energy, Lstar] = differential_content_energy_pitch_angle(epoch_select,satellite,orbtimes,flux_directory,DC_directory,filename_flux)
+function [diff_content, energy, Lstar] = differential_content_energy_pitch_angle(epoch_select,satellite,orbtimes,flux_directory,DC_directory,filename_flux,filename_PSD,PSD_directory)
 
 %constants
 const.c = 299792458*100;%cm/s, speed of light
 const.E_0 = 0.511;%MeV, electron rest energy
 const.R_E = 6371*10^5;%cm, Earth radius
+const.B_0 = 0.311653; %G
+const.mu_E = const.B_0*(const.R_E*10^5)^3; %cm^3 G, magnetic moment of Earth
+
+%import PSD data from PSD file list
+PSD = []; epoch = []; mu = []; K = []; Lstar = []; energy = []; alpha_sat = [];
+for PSD_file_idx = 1:length(filename_PSD)
+    [PSD_i,epoch_i,mu_i,K_i,Lstar_i,energy_i,alpha_i,datainfo] = import_PSD(strcat(PSD_directory,filename_PSD(PSD_file_idx)));
+    PSD = cat(3,PSD,PSD_i);
+    epoch = cat(1,epoch,epoch_i);
+    mu = cat(3,mu,mu_i);
+    K = cat(3,K,K_i);
+    Lstar = cat(3,Lstar,Lstar_i);
+    energy = cat(3,energy,energy_i);
+    alpha_sat = cat(3,alpha_sat,alpha_i);
+end
 
 
-%import MagEIS data from given file list
-flux = []; epoch = []; Lstar = []; B_eq = []; B_sat = [];
+%import MagEIS data from file list
+flux = []; epoch2 = []; B_eq = []; B_sat = []; Lstar2 = []; 
 for flux_file_idx = 1:length(filename_flux)
     [data_flux_i,~] = spdfcdfread(strcat(flux_directory,filename_flux(flux_file_idx)),'Variables',{'Epoch','FEDU_CORR','FEDU_Alpha','FEDU_Energy','L_star','B_Calc','B_Eq'});
     epoch_i = data_flux_i{1};
     flux_i = data_flux_i{2}*1000;%convert 1/keV to 1/MeV
     flux_i = flux_i(:,1:end-4,:);
-    alpha_sat = data_flux_i{3};
-    energy = data_flux_i{4}/1000;%convert keV to MeV
-    energy = energy(1:end-4);
+    alpha_sat_mageis = data_flux_i{3};
+    energy2 = data_flux_i{4}/1000;%convert keV to MeV
+    energy2 = energy2(1:end-4);
     Lstar_i = data_flux_i{5};
     B_sat_i = data_flux_i{6}*10^-5;%convert nT to G
     B_eq_i = data_flux_i{7}*10^-5;%convert nT to G
     
-    epoch = cat(1,epoch,epoch_i);
+    epoch2 = cat(1,epoch2,epoch_i);
     flux = cat(3,flux,flux_i);
-    Lstar = cat(1,Lstar,Lstar_i);
+    Lstar2 = cat(1,Lstar2,Lstar_i);
     B_sat = cat(1,B_sat,B_sat_i);
     B_eq = cat(1,B_eq,B_eq_i);
 end
 
 %select out data corresponding to single half orbit
-[flux,epoch,Lstar,B_sat,B_eq] = half_orbit_select(flux,epoch,Lstar,B_sat,B_eq,orbtimes,epoch_select);
+[flux,epoch2,Lstar2,B_sat,B_eq] = half_orbit_select(flux,epoch2,Lstar2,B_sat,B_eq,orbtimes,epoch_select);
+[PSD,epoch,mu,K,Lstar,energy,alpha_sat] = half_orbit_select_PSD(PSD,epoch,mu,K,Lstar,energy,alpha_sat,orbtimes,epoch_select);
+
+% interpolate flux/B_sat/B_eq to same timebase as PSD/Lstar/etc
+%flux  = interp3(energy2,alpha_sat_mageis,epoch2,flux,energy(1,:,1),alpha_sat(:,1,1),epoch);
+%B_sat = interp1(epoch2,B_sat,epoch);
+%B_eq = interp1(epoch2,B_eq,epoch);
+%[alpha_length,energy_length,Lstar_length] = size(flux);
+
+
+% interpolate Lstar/mu/K to same timebase as flux
 [alpha_length,energy_length,Lstar_length] = size(flux);
+Lstar = interp3(energy(1,:,1),alpha_sat(:,1,1),epoch,Lstar,energy2,alpha_sat_mageis',epoch2);
+mu    = interp3(energy(1,:,1),alpha_sat(:,1,1),epoch,mu   ,energy2,alpha_sat_mageis',epoch2);
+K     = interp3(energy(1,:,1),alpha_sat(:,1,1),epoch,K    ,energy2,alpha_sat_mageis',epoch2);
+alpha_sat = repmat(alpha_sat_mageis,[1,energy_length,Lstar_length]);
+energy = repmat(energy2,[1,alpha_length,Lstar_length]);
+energy = permute(energy,[2,1,3]);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,18 +84,41 @@ plot_toggle_diff = 0;%creates plots of differential content (intermediate step o
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%format into a grid format (eg. alpha goes from a vector to a 3D grid) to
-%be compatible with the flux data (pointwise operations are easier than for loops)
-alpha_sat = repmat(alpha_sat,[1,energy_length,Lstar_length]);
-energy = repmat(energy,[1,alpha_length,Lstar_length]); energy = permute(energy,[2,1,3]);
-Lstar = repmat(Lstar,[1,alpha_length,energy_length]); Lstar = permute(Lstar,[2,3,1]);
+use_L_from_MagEIS=0;
+if(use_L_from_MagEIS)
+    %format into a grid format (eg. alpha goes from a vector to a 3D grid) to
+    %be compatible with the flux data (pointwise operations are easier than for loops)
+    alpha_sat = repmat(alpha_sat,[1,energy_length,Lstar_length]);
+    energy = repmat(energy,[1,alpha_length,Lstar_length]); energy = permute(energy,[2,1,3]);
+    Lstar = repmat(Lstar,[1,alpha_length,energy_length]); Lstar = permute(Lstar,[2,3,1]);
+end
 B_sat = repmat(B_sat,[1,alpha_length,energy_length]); B_sat = permute(B_sat,[2,3,1]);
-B_eq = repmat(B_eq,[1,alpha_length,energy_length]); B_eq = permute(B_eq,[2,3,1]);
+B_eq = repmat(B_eq,[1,alpha_length,energy_length]); B_eq = permute(B_eq,[2,3,1]);  
 
 %convert alpha_sat to alpha_eq (the formula only returns values between 0
 %and 90 so the second line to to adjust to the pitch angles back to the original)
 %the 90 deg pitch angle (at the satellite) splits into 2 cases (one <90 and one >90, but is taken into account below (ctrl. f: ***)
 alpha_eq = asind(sqrt(((B_eq).*(sind(alpha_sat).^2))./(B_sat)));
+
+% Compute alpha_eq, the pitch angle at the equator after switching to a
+% dipole system. Use the following equation from Schulz and Lanzerotti:
+%   y*sqrt(L/0.31)*K-2.7604*(1-y)-0.6396*(y*log(y)+2*y-2*sqrt(y))=0
+% with y = sin(alpha_eq)
+alpha_eq_for_interp=0.1:0.1:90;
+y=sind(alpha_eq_for_interp);
+K_sqrt_L = 2.7604*(1-y)+0.6396*(y.*log(y)+2*y-2*sqrt(y));
+indx=find(isfinite(Lstar) & isfinite(K) & (K>0) & (Lstar>0));
+alpha_eq(indx)=interp1(K_sqrt_L,alpha_eq_for_interp,K(indx).*sqrt(Lstar(indx)));
+
+% Recompute energy after switching to the dipole system
+B_dip = const.B_0/(Lstar.*Lstar.*Lstar);
+m=const.E_0/const.c/const.c;
+p_perp=sqrt(2*m*B_dip.*mu);
+E_perp = sqrt(p_perp.*p_perp*const.c*const.c+const.E_0*const.E_0)-const.E_0;
+p_par = p_perp./tand(alpha_eq);
+E_par = sqrt(p_par.*p_par*const.c*const.c+const.E_0*const.E_0)-const.E_0;
+energy = E_perp+E_par;
+
 alpha_eq(7:end,:,:) = 180 - alpha_eq(7:end,:,:);%because sind() returns a number between 0 deg and 90 deg, convert all pitch angles known to be above 90 to what they should be;
 %add in flux at the loss cone, first calc alpha_eq_LC and then append to grid formatted data
 h = 100*10^5;%cm because R_E is also in cm
@@ -115,16 +170,21 @@ diff_content = zeros(Lstar_interp_length,energy_interp_length);
 for i = 1:Lstar_interp_length
     %select out the closest Lstar data to the interpolated data
     Lstar_slice = Lstar_interp(i);
-    [~,nearest_Lstar_index] = min(abs(Lstar(1,1,:)-Lstar_slice));
+    %[~,nearest_Lstar_index] = min(abs(Lstar(1,1,:)-Lstar_slice));
+    indx=find(abs(Lstar-Lstar_slice) < (Lstar_interp(2)-Lstar_interp(1))/2);
+    
     
     %define meshes for data and interpolated points
     alpha_eq_interp_at_Lstar_slice = linspace(asind((1 + ((1.5).*(h./const.R_E)))./(Lstar_slice.^(3/2).*(4-((3./Lstar_slice).*(1+(h./const.R_E)))).^(0.25))),90,alpha_interp_length);
     %alpha_eq_interp_at_Lstar_slice = linspace(51.2172,90,alpha_interp_length);
     
     [energy_interp_at_Lstar_slice,alpha_eq_interp_at_Lstar_slice] = meshgrid(energy_interp,alpha_eq_interp_at_Lstar_slice);
-    alpha_eq_at_Lstar_slice = alpha_eq(:,:,nearest_Lstar_index);alpha_eq_at_Lstar_slice = alpha_eq_at_Lstar_slice(:);
-    energy_at_Lstar_slice = energy(:,:,nearest_Lstar_index); energy_at_Lstar_slice = energy_at_Lstar_slice(:);
-    flux_at_Lstar_slice = flux(:,:,nearest_Lstar_index); flux_at_Lstar_slice = flux_at_Lstar_slice(:);
+    %alpha_eq_at_Lstar_slice = alpha_eq(:,:,nearest_Lstar_index);alpha_eq_at_Lstar_slice = alpha_eq_at_Lstar_slice(:);
+    %energy_at_Lstar_slice = energy(:,:,nearest_Lstar_index); energy_at_Lstar_slice = energy_at_Lstar_slice(:);
+    %flux_at_Lstar_slice = flux(:,:,nearest_Lstar_index); flux_at_Lstar_slice = flux_at_Lstar_slice(:);
+    alpha_eq_at_Lstar_slice = alpha_eq(indx);
+    energy_at_Lstar_slice = energy(indx);
+    flux_at_Lstar_slice = flux(indx);
     
     %remove flux<0 and to avoid log(0) errors, set flux = 0 to a very small value in comparison to typical flux values
     alpha_eq_at_Lstar_slice(flux_at_Lstar_slice<=0) = [];

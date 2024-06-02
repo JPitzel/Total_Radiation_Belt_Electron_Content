@@ -1,10 +1,11 @@
 
-function [TRBEC,epoch] = TRBEC_energy_pitch_angle_wrapper(flux_directory,DC_directory,start_epoch,stop_epoch,satellite,energy_min,energy_max,Lstar_min,Lstar_max)
+function [TRBEC,epoch] = TRBEC_energy_pitch_angle_wrapper(flux_directory,DC_directory,start_epoch,stop_epoch,satellite,energy_min,energy_max,Lstar_min,Lstar_max,PSD_directory)
 % Compute the TRBEC using (Energy, L*) bounds.
 % Use the differential content file if it exists.
 % Otherwise, generate the differential content file first.
 
 %given start and stop times, determine filenames of flux data to import
+[selected_PSD_filenames,selected_PSD_filename_epoch] = select_PSD_filenames(PSD_directory,satellite,start_epoch,stop_epoch);
 [selected_flux_filenames,selected_flux_filename_epoch] = select_flux_filenames(flux_directory,satellite,start_epoch,stop_epoch);
 
 %determine half orbit epochs
@@ -21,8 +22,10 @@ for selected_half_orbit_idx = 1:length(orbtimes)-1%go through all complete half 
     selected_file_idx = find(selected_flux_filename_epoch == floor(selected_half_orbit));%find filename index for half orbit start epoch
     %if next orbit is on the same day, only one file is need, otherwise the next day is also required to have data for the full half orbit
     if floor(selected_half_orbit) == floor(next_selected_half_orbit)
+        filename_PSD_i = selected_PSD_filenames(selected_file_idx);
         filename_flux_i = selected_flux_filenames(selected_file_idx);
     else
+        filename_PSD_i = selected_PSD_filenames(selected_file_idx:selected_file_idx+1);
         filename_flux_i = selected_flux_filenames(selected_file_idx:selected_file_idx+1);
     end
     
@@ -33,7 +36,7 @@ for selected_half_orbit_idx = 1:length(orbtimes)-1%go through all complete half 
          epoch = [epoch;selected_half_orbit];
       catch
           try%if DC file doesn't already exist, generate it and compute the TRBEC from the DC file
-             differential_content_energy_pitch_angle(selected_half_orbit,satellite,orbtimes,flux_directory,DC_directory,filename_flux_i);
+             differential_content_energy_pitch_angle(selected_half_orbit,satellite,orbtimes,flux_directory,DC_directory,filename_flux_i,filename_PSD_i,PSD_directory);
              TRBEC = [TRBEC;TRBEC_energy_pitch_angle(DC_directory,satellite,selected_half_orbit,energy_min,energy_max,Lstar_min,Lstar_max)];
              epoch = [epoch;selected_half_orbit];
              disp(strcat('CREATED: ',DC_directory,'DC_E_A_',satellite,datestr(selected_half_orbit,'_yyyymmdd_HHMMSS'),'.mat'));

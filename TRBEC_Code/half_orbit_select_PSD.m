@@ -1,5 +1,5 @@
 %Takes in a given time and orbit data and return data for the half orbit that occured during the given time
-function [PSD_half_orbit,epoch_half_orbit,mu_half_orbit,K_half_orbit,Lstar_half_orbit,energy_half_orbit,alpha_half_orbit] = half_orbit_select(PSD,epoch,mu,K,Lstar,energy,alpha,orbtimes,epoch_select)
+function [PSD_half_orbit,epoch_half_orbit,mu_half_orbit,K_half_orbit,Lstar_half_orbit,energy_half_orbit,alpha_half_orbit] = half_orbit_select_PSD(PSD,epoch,mu,K,Lstar,energy,alpha,orbtimes,epoch_select)
 %from the given time, select out the times that denote the beginning and end of the half orbit
 [orbtimes_begin, orbtimes_begin_index]= max((orbtimes<=epoch_select).*orbtimes);
 orbtimes_end = orbtimes(orbtimes_begin_index + 1);

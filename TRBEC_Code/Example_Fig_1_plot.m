@@ -5,7 +5,7 @@
 % showing TRBEC integrated in (mu,K,L*) space in March 2013.
 % Script "Example_Fig_1_calculate.m" must be run first to generate the
 % required intermediate data files.
-% To reproduce the entire Figure, run this script 4 times with the
+% To reproduce the entire figure, run this script 4 times with the
 % appropriate bounds for mu by changing N in line:
 %   mu_bounds = mu_bounds(N,:);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -16,8 +16,8 @@ clc
 % Setup
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 directory = 'DC_mu_K\';
-export_filename = 'mu_K_50_to_200.jpg';
-legend_toggle = 1;
+export_filename = 'mu_K_1000_to_2000.jpg';
+legend_toggle = 0;
 bounds_toggle = 1;
 output_toggle = 1;
 
@@ -34,7 +34,7 @@ mu_bounds = [50, 200;
             200, 500;
             500, 1000;
             1000, 2000;];
-mu_bounds = mu_bounds(1,:);
+mu_bounds = mu_bounds(4,:);
 
 %Lstar bounds [Lstar_min,Lstar_max], size must match mu_bounds above
 Lstar_min = 3.5;
@@ -64,7 +64,7 @@ set(gca,'fontname',font_type)
 %axis labels
 ylabel('TRBEC')
 %ylim([10^23 4*10^25])%for 500 to 1000
-%ylim([1*10^22 5*10^25])%for 1000 to 2000
+ylim([1*10^22 5*10^25])%for 1000 to 2000
 xlim([epoch_start epoch_stop]);
 datetick('x','dd-mmm','keeplimits')
 ax = gca; 
@@ -114,9 +114,8 @@ function main(directory,epoch_start,epoch_stop,separate_or_combine,individual_or
         %get rid of TRBEC = 0
         epoch_rbspa(TRBEC_rbspa == 0) = [];epoch_rbspb(TRBEC_rbspb == 0) = [];
         TRBEC_rbspa(TRBEC_rbspa == 0) = [];TRBEC_rbspb(TRBEC_rbspb == 0) = [];
-
-        epoch_rbspa(TRBEC_rbspa > 10^30) = [];epoch_rbspb(TRBEC_rbspb > 10^30) = [];
-        TRBEC_rbspa(TRBEC_rbspa > 10^30) = [];TRBEC_rbspb(TRBEC_rbspb > 10^30) = [];
+        epoch_rbspa(TRBEC_rbspa > 10^30) = [];epoch_rbspb(TRBEC_rbspb > 10^27) = [];
+        TRBEC_rbspa(TRBEC_rbspa > 10^30) = [];TRBEC_rbspb(TRBEC_rbspb > 10^27) = [];
 
 
         %remove outliers ('mean' defines outliers as points that are three standard deviations from the mean).

@@ -16,8 +16,8 @@ clc
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tic
 directory = 'DC_E_PA\';
-export_filename = 'E_PA_35_to_4.jpg';
-legend_toggle = 1;
+export_filename = 'E_PA_35_to_5.jpg';
+legend_toggle = 0;
 bounds_toggle = 1;
 output_toggle = 1;
 
