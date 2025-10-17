@@ -41,8 +41,8 @@ function differential_content_mu_K(epoch_select,satellite,orbtimes,PSD_directory
     [PSD,mu,K,Lstar,alpha,energy] = K_loss_cone_small_mu(PSD,mu,K,Lstar,alpha,energy,Bsat,const,1);%using K(alpha = 10)
     [PSD,mu,K,Lstar,alpha,energy] = K_loss_cone_small_mu(PSD,mu,K,Lstar,alpha,energy,Bsat,const,length(alpha(:,1,1))-1);%using K(alpha = 170)
 
-    %add PSD = 0 at the loss cone at large mu
-    [PSD,mu,K,Lstar,alpha,energy] = K_loss_cone_large_mu(PSD,mu,K,Lstar,alpha,energy);
+    %add senitnel points to the mu and k arrays, and correct shapes of the other arrays in preparation for interpolation
+    [PSD,mu,K,Lstar,alpha,energy] = K_mu_ghost_points(PSD,mu,K,Lstar,alpha,energy);
 
     %add in K = 0 particles that cannot be seen by the detector
     [PSD,mu,K,Lstar,alpha,energy] = equatorial_particles(PSD,mu,K,Lstar,alpha,energy,Bsat,Beq);
