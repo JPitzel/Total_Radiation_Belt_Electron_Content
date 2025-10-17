@@ -60,6 +60,15 @@ mkdir(flux_directory);
 warning('on') 
 download_data(PSD_directory,flux_directory,epoch_start,epoch_stop)
 
+%Before moving on the extra downloaded  .html files need to be removed.
+%These files are sometimes created when the downloaded data has more than a
+%single version.
+%PSD data
+delete(fullfile(PSD_directory, '*.html'))
+
+%Flux data
+delete(fullfile(flux_directory, '*.html'))
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Step 3: Calculate the TRBEC over the given integration bounds.
 % This will also create the differential content files in directory
